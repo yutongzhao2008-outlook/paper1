@@ -22,7 +22,7 @@ graph TD
     E --> P[数据预处理]
     P --> Q[特征工程]
     Q --> R[模型迭代训练]
-    R --> S{(Logistic Regression,Decision Tree,Random Forest,Gradient Boosting,SVM,KNN) accuracy > 0.95}
+    R --> S{Logistic Regression,Decision Tree,Random Forest,Gradient Boosting,SVM,KNN accuracy > 0.95}
     S -->|否| R
     S -->|是| T[最终模型预测]
     T --> U[生成分类结果文件]
