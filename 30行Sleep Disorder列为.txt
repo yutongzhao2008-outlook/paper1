@@ -1,0 +1,521 @@
+随机选出30行Sleep Disorder列为"normal"的数据,， 随机选出30行在Sleep Disorder列等于"Insomnia"数据 ，  随机选出30行Sleep Disorder列等于Sleep Apnea数据 ，  
+共90行保存成一个新的文件，在原文件中删除这些数据，共生成两个文件(文件名带90）。可供我下载。
+
+
+接下来我会按照要求从数据中随机选取数据并保存成两个新文件，具体步骤如下：
+1. 随机选出30行Sleep Disorder列为"normal"的数据。
+2. 随机选出30行在Sleep Disorder列等于"Insomnia"数据。
+3. 随机选出30行Sleep Disorder列等于Sleep Apnea数据。
+4. 将以上90行数据保存成一个新的文件。
+5. 在原文件中删除这些数据并保存为另一个文件。
+
+
+```python
+import pandas as pd
+
+# 读取数据
+df = pd.read_csv('/mnt/Sleep_health_and_lifestyle_dataset_normal.csv')
+
+# 筛选出Sleep Disorder列中值为'normal'、'Insomnia'和'Sleep Apnea'的数据
+normal_data = df[df['Sleep Disorder'] == 'normal']
+insomnia_data = df[df['Sleep Disorder'] == 'Insomnia']
+sleep_apnea_data = df[df['Sleep Disorder'] == 'Sleep Apnea']
+
+# 随机选取30行数据
+normal_sample = normal_data.sample(n=30)
+insomnia_sample = insomnia_data.sample(n=30)
+sleep_apnea_sample = sleep_apnea_data.sample(n=30)
+
+# 合并选取的数据
+selected_data = pd.concat([normal_sample, insomnia_sample, sleep_apnea_sample])
+
+# 将选取的数据保存为新的CSV文件
+selected_data.to_csv('/mnt/Sleep_health_and_lifestyle_dataset_selected_90.csv', index=False)
+
+# 从原始数据中删除选取的数据
+remaining_data = df.drop(selected_data.index)
+
+# 将剩余的数据保存为新的CSV文件
+remaining_data.to_csv('/mnt/Sleep_health_and_lifestyle_dataset_remaining_90.csv', index=False)
+```
+
+
+```STDOUT
+```
+
+
+
+根据执行结果，已成功按照要求将选取的数据保存为一个新文件，并将剩余的数据保存为另一个新文件。你可以点击下面的链接下载生成的文件：
+[Sleep_health_and_lifestyle_dataset_selected_90.csv](sandbox://ocean-cloud-tos/ci/751035561650434_751035561650690/Sleep_health_and_lifestyle_dataset_selected_90.csv)
+[Sleep_health_and_lifestyle_dataset_remaining_90.csv](sandbox://ocean-cloud-tos/ci/751035561650434_751035561650690/Sleep_health_and_lifestyle_dataset_remaining_90.csv) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.根据第一个上传文件中每一行的内容： Person ID Gender Age Occupation Sleep Duration Quality of Sleep Physical Activity Level Stress Level BMI Category Blood Pressure Heart Rate Daily Steps， 判断每一行的Sleep Disorder， 做个分类，输出有三个可选项（normal, Sleep Apnea,Insomnia）
+
+
+
+
+
+
+
+
+
+1.第一个上传文件中每一行的内容： Person ID Gender Age Occupation Sleep Duration Quality of Sleep Physical Activity Level Stress Level BMI Category Blood Pressure Heart Rate Daily Steps，作为特征，训练一个线性分类器， 
+2.然后将第二个上传文件的每一行送到刚才训练好的线性分类器做预测， 做个分类，输出有三个可选项（normal, Sleep Apnea,Insomnia）， 每一行添加一列Sleep Disorder，，生成新的CSV文件供下载（文件名classfiers_by_15samples.csv)
+
+
+
+
+接下来，我会根据第一个文件的数据训练一个线性分类器，并使用该分类器对第二个文件的数据进行预测，然后将预测结果保存到一个新的 CSV 文件中。
+
+```python
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+# 读取第一个 CSV 文件
+file_path_1 = '/mnt/Sleep_health_and_lifestyle_dataset_selected.csv'
+df_1 = pd.read_csv(file_path_1)
+
+# 读取第二个 CSV 文件
+file_path_2 = '/mnt/Sleep_health_and_lifestyle_dataset_remaining_1.csv'
+df_2 = pd.read_csv(file_path_2)
+
+# 对特征进行编码
+categorical_columns = ['Gender', 'Occupation', 'BMI Category', 'Blood Pressure']
+for col in categorical_columns:
+    le = LabelEncoder()
+    df_1[col] = le.fit_transform(df_1[col])
+    if col in df_2.columns:
+        df_2[col] = le.transform(df_2[col])
+
+# 准备训练数据和目标变量
+X = df_1.drop('Sleep Disorder', axis=1)
+y = df_1['Sleep Disorder']
+
+# 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 训练线性分类器（这里使用逻辑回归作为示例）
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# 在第二个文件上进行预测并添加新的列
+df_2['Sleep Disorder'] = model.predict(df_2)
+
+# 保存结果到新的 CSV 文件
+new_file_path = '/mnt/classfiers_by_15samples.csv'
+df_2.to_csv(new_file_path, index=False)
+```
+
+
+```STDERR
+KeyError: 'Software Engineer'
+
+Cell In[1], line 20
+     18     df_1[col] = le.fit_transform(df_1[col])
+     19     if col in df_2.columns:
+---> 20         df_2[col] = le.transform(df_2[col])
+     22 # 准备训练数据和目标变量
+     23 X = df_1.drop('Sleep Disorder', axis=1)
+
+ValueError: y contains previously unseen labels: 'Software Engineer'
+```
+
+根据错误信息可知，在对`df_2`中的分类列进行`transform`时，遇到了`df_2`中出现了`df_1`训练数据中未见过的标签（如'Software Engineer'）。以下是解决这个问题的步骤：
+
+1. **确保训练和测试数据的一致性**：在对分类列进行编码时，要确保训练数据和测试数据（第二个文件的数据）使用相同的编码映射。
+2. **处理未知标签**：可以在编码时添加一个特殊的标签来处理未知标签，例如将未知标签映射到一个特殊的编码值。
+
+下面是修改后的代码：
+
+
+```python
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+# 读取第一个 CSV 文件
+file_path_1 = '/mnt/Sleep_health_and_lifestyle_dataset_selected.csv'
+df_1 = pd.read_csv(file_path_1)
+
+# 读取第二个 CSV 文件
+file_path_2 = '/mnt/Sleep_health_and_lifestyle_dataset_remaining_1.csv'
+df_2 = pd.read_csv(file_path_2)
+
+# 定义一个函数来处理未知标签
+def fit_transform_with_unknowns(le, data, all_categories):
+    unique_data = np.unique(data)
+    known_categories = [cat for cat in unique_data if cat in all_categories]
+    le.fit(known_categories)
+    result = np.array([le.transform([x])[0] if x in known_categories else len(le.classes_) for x in data])
+    return result
+
+# 对特征进行编码
+categorical_columns = ['Gender', 'Occupation', 'BMI Category', 'Blood Pressure']
+label_encoders = {}
+for col in categorical_columns:
+    all_categories = pd.concat([df_1[col], df_2[col]]).unique()
+    le = LabelEncoder()
+    df_1[col] = fit_transform_with_unknowns(le, df_1[col], all_categories)
+    if col in df_2.columns:
+        df_2[col] = fit_transform_with_unknowns(le, df_2[col], all_categories)
+    label_encoders[col] = le
+
+# 准备训练数据和目标变量
+X = df_1.drop('Sleep Disorder', axis=1)
+y = df_1['Sleep Disorder']
+
+# 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 训练线性分类器（这里使用逻辑回归作为示例）
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# 在第二个文件上进行预测并添加新的列
+df_2['Sleep Disorder'] = model.predict(df_2)
+
+# 保存结果到新的 CSV 文件
+new_file_path = '/mnt/classfiers_by_15samples.csv'
+df_2.to_csv(new_file_path, index=False)
+```
+
+
+```STDOUT
+```
+
+
+
+根据执行结果，已成功完成对第二个文件的数据预测并保存到新的 CSV 文件中。可以点击下面的链接下载生成的新文件：
+[classfiers_by_15samples.csv](sandbox://ocean-cloud-tos/ci/750837985228034_750837985228290/classfiers_by_15samples.csv) 
+
+
+
+
+
+1.第一个上传文件中每一行的内容： Person ID Gender Age Occupation Sleep Duration Quality of Sleep Physical Activity Level Stress Level BMI Category Blood Pressure Heart Rate Daily Steps，作为特征，训练一个线性分类器， 
+2.然后将第二个上传文件的每一行送到刚才训练好的线性分类器做预测， 做个分类，输出有三个可选项（normal, Sleep Apnea,Insomnia）， 每一行添加一列Sleep Disorder，，生成新的CSV文件供下载（文件名classfiers_by_15samples.csv)
+3.用第三个上传文件(grouund truth), classfiers_by_15samples.csv作为输入， 用sklearn.metric  accuracy_score, precision_score, f1_score, recall_score, confusion_matrix, roc_curve, auc 计算出结果， 并画图。
+
+
+
+
+
+
+下面我会按照以下步骤进行操作：
+1. 使用第一个上传文件中的数据训练一个线性分类器。
+2. 将第二个上传文件的每一行送到训练好的线性分类器进行预测，并添加一列`Sleep Disorder`。
+3. 使用第三个上传文件和生成的新文件计算相关的评估指标并画图。
+
+
+```python
+import pandas as pd
+
+# 读取第一个文件
+df1 = pd.read_csv('/mnt/Sleep_health_and_lifestyle_dataset_selected.csv')
+
+# 读取第二个文件
+df2 = pd.read_csv('/mnt/Sleep_health_and_lifestyle_dataset_remaining_1.csv')
+
+# 读取第三个文件
+df3 = pd.read_csv('/mnt/Sleep_health_and_lifestyle_dataset_remaining.csv')
+
+print('第一个文件的基本信息：')
+df1.info()
+
+# 查看第一个文件的前几行
+print('第一个文件的前几行：')
+print(df1.head())
+
+print('第二个文件的基本信息：')
+df2.info()
+
+# 查看第二个文件的前几行
+print('第二个文件的前几行：')
+print(df2.head())
+
+print('第三个文件的基本信息：')
+df3.info()
+
+# 查看第三个文件的前几行
+print('第三个文件的前几行：')
+print(df3.head())
+```
+
+
+```STDOUT
+第一个文件的基本信息：
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 15 entries, 0 to 14
+Data columns (total 13 columns):
+ #   Column                   Non-Null Count  Dtype  
+---  ------                   --------------  -----  
+ 0   Person ID                15 non-null     int64  
+ 1   Gender                   15 non-null     object 
+ 2   Age                      15 non-null     int64  
+ 3   Occupation               15 non-null     object 
+ 4   Sleep Duration           15 non-null     float64
+ 5   Quality of Sleep         15 non-null     int64  
+ 6   Physical Activity Level  15 non-null     int64  
+ 7   Stress Level             15 non-null     int64  
+ 8   BMI Category             15 non-null     object 
+ 9   Blood Pressure           15 non-null     object 
+ 10  Heart Rate               15 non-null     int64  
+ 11  Daily Steps              15 non-null     int64  
+ 12  Sleep Disorder           15 non-null     object 
+dtypes: float64(1), int64(7), object(5)
+memory usage: 1.6+ KB
+第一个文件的前几行：
+   Person ID  Gender  Age  Occupation  Sleep Duration  Quality of Sleep  \
+0        299  Female   51    Engineer             8.5                 9   
+1        317  Female   53    Engineer             8.5                 9   
+2         98  Female   36  Accountant             7.1                 8   
+3        333  Female   54    Engineer             8.4                 9   
+4         61    Male   32      Doctor             6.0                 6   
+
+   Physical Activity Level  Stress Level BMI Category Blood Pressure  \
+0                       30             3       Normal         125/80   
+1                       30             3       Normal         125/80   
+2                       60             4       Normal         115/75   
+3                       30             3       Normal         125/80   
+4                       30             8       Normal         125/80   
+
+   Heart Rate  Daily Steps Sleep Disorder  
+0          65         5000         normal  
+1          65         5000         normal  
+2          68         7000         normal  
+3          65         5000         normal  
+4          72         5000         normal  
+第二个文件的基本信息：
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 359 entries, 0 to 358
+Data columns (total 12 columns):
+ #   Column                   Non-Null Count  Dtype  
+---  ------                   --------------  -----  
+ 0   Person ID                359 non-null    int64  
+ 1   Gender                   359 non-null    object 
+ 2   Age                      359 non-null    int64  
+ 3   Occupation               359 non-null    object 
+ 4   Sleep Duration           359 non-null    float64
+ 5   Quality of Sleep         359 non-null    int64  
+ 6   Physical Activity Level  359 non-null    int64  
+ 7   Stress Level             359 non-null    int64  
+ 8   BMI Category             359 non-null    object 
+ 9   Blood Pressure           359 non-null    object 
+ 10  Heart Rate               359 non-null    int64  
+ 11  Daily Steps              359 non-null    int64  
+dtypes: float64(1), int64(7), object(4)
+memory usage: 33.8+ KB
+第二个文件的前几行：
+   Person ID Gender  Age            Occupation  Sleep Duration  \
+0          1   Male   27     Software Engineer             6.1   
+1          2   Male   28                Doctor             6.2   
+2          3   Male   28                Doctor             6.2   
+3          4   Male   28  Sales Representative             5.9   
+4          5   Male   28  Sales Representative             5.9   
+
+   Quality of Sleep  Physical Activity Level  Stress Level BMI Category  \
+0                 6                       42             6   Overweight   
+1                 6                       60             8       Normal   
+2                 6                       60             8       Normal   
+3                 4                       30             8        Obese   
+4                 4                       30             8        Obese   
+
+  Blood Pressure  Heart Rate  Daily Steps  
+0         126/83          77         4200  
+1         125/80          75        10000  
+2         125/80          75        10000  
+3         140/90          85         3000  
+4         140/90          85         3000  
+第三个文件的基本信息：
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 359 entries, 0 to 358
+Data columns (total 13 columns):
+ #   Column                   Non-Null Count  Dtype  
+---  ------                   --------------  -----  
+ 0   Person ID                359 non-null    int64  
+ 1   Gender                   359 non-null    object 
+ 2   Age                      359 non-null    int64  
+ 3   Occupation               359 non-null    object 
+ 4   Sleep Duration           359 non-null    float64
+ 5   Quality of Sleep         359 non-null    int64  
+ 6   Physical Activity Level  359 non-null    int64  
+ 7   Stress Level             359 non-null    int64  
+ 8   BMI Category             359 non-null    object 
+ 9   Blood Pressure           359 non-null    object 
+ 10  Heart Rate               359 non-null    int64  
+ 11  Daily Steps              359 non-null    int64  
+ 12  Sleep Disorder           359 non-null    object 
+dtypes: float64(1), int64(7), object(5)
+memory usage: 36.6+ KB
+第三个文件的前几行：
+   Person ID Gender  Age            Occupation  Sleep Duration  \
+0          1   Male   27     Software Engineer             6.1   
+1          2   Male   28                Doctor             6.2   
+2          3   Male   28                Doctor             6.2   
+3          4   Male   28  Sales Representative             5.9   
+4          5   Male   28  Sales Representative             5.9   
+
+   Quality of Sleep  Physical Activity Level  Stress Level BMI Category  \
+0                 6                       42             6   Overweight   
+1                 6                       60             8       Normal   
+2                 6                       60             8       Normal   
+3                 4                       30             8        Obese   
+4                 4                       30             8        Obese   
+
+  Blood Pressure  Heart Rate  Daily Steps Sleep Disorder  
+0         126/83          77         4200         normal  
+1         125/80          75        10000         normal  
+2         125/80          75        10000         normal  
+3         140/90          85         3000    Sleep Apnea  
+4         140/90          85         3000    Sleep Apnea
+```
+
+根据输出结果可知，第一个文件有15行13列数据，第二个文件有359行12列数据，第三个文件有359行13列数据。参与分析的列为第一个文件中的`Gender`、`Age`、`Occupation`、`Sleep Duration`、`Quality of Sleep`、`Physical Activity Level`、`Stress Level`、`BMI Category`、`Blood Pressure`、`Heart Rate`、`Daily Steps`，以及第二个和第三个文件中的相同列。
+接下来，我会对这些特征进行编码，然后训练一个线性分类器，使用训练好的分类器对第二个文件的数据进行预测，并将预测结果保存到一个新的 CSV 文件中，最后使用第三个文件和新生成的文件计算相关的评估指标并画图。
+
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
+from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score, confusion_matrix, roc_curve, auc
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 提取特征和目标变量
+X = df1.drop(['Person ID', 'Sleep Disorder'], axis=1)
+y = df1['Sleep Disorder']
+
+# 对分类变量进行编码
+categorical_cols = X.select_dtypes(include=['object']).columns
+for col in categorical_cols:
+    le = LabelEncoder()
+    X[col] = le.fit_transform(X[col])
+
+# 训练线性分类器
+clf = LogisticRegression(max_iter=1000)
+clf.fit(X, y)
+
+# 对第二个文件的分类变量进行编码
+df2_encoded = df2.copy()
+for col in categorical_cols:
+    le = LabelEncoder()
+    df2_encoded[col] = le.fit_transform(df2_encoded[col])
+
+# 使用训练好的分类器进行预测
+df2_encoded['Sleep Disorder'] = clf.predict(df2_encoded.drop('Person ID', axis=1))
+
+# 将结果保存为新的 CSV 文件
+output_path = '/mnt/classfiers_by_15samples.csv'
+df2_encoded.to_csv(output_path, index=False)
+
+# 对第三个文件的分类变量进行编码
+df3_encoded = df3.copy()
+for col in categorical_cols:
+    le = LabelEncoder()
+    df3_encoded[col] = le.fit_transform(df3_encoded[col])
+
+# 计算评估指标
+y_true = df3_encoded['Sleep Disorder']
+y_pred = df2_encoded['Sleep Disorder']
+
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, average='weighted')
+f1 = f1_score(y_true, y_pred, average='weighted')
+recall = recall_score(y_true, y_pred, average='weighted')
+confusion = confusion_matrix(y_true, y_pred)
+
+# 计算 ROC 曲线和 AUC
+encoder = OrdinalEncoder()
+y_true_encoded = encoder.fit_transform(y_true.values.reshape(-1, 1))
+y_pred_encoded = encoder.transform(y_pred.values.reshape(-1, 1))
+
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+n_classes = len(np.unique(y_true_encoded))
+for i in range(n_classes):
+    fpr[i], tpr[i], _ = roc_curve((y_true_encoded == i).astype(int), (y_pred_encoded == i).astype(int))
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# 绘制 ROC 曲线
+plt.figure(figsize=(8, 6))
+for i in range(n_classes):
+    plt.plot(fpr[i], tpr[i], label=f'Class {i} (AUC = {roc_auc[i]:.2f})')
+
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc='lower right')
+
+plt.show()
+
+# 打印评估指标
+print(f'Accuracy: {accuracy}')
+print(f'Precision: {precision}')
+print(f'F1-Score: {f1}')
+print(f'Recall: {recall}')
+print(f'Confusion Matrix:\n{confusion}')
+```
+
+
+```STDOUT
+Accuracy: 0.6545961002785515
+Precision: 0.7623530029343597
+F1-Score: 0.6670696717991715
+Recall: 0.6545961002785515
+Confusion Matrix:
+[[ 62   4   6]
+ [ 16  54   3]
+ [ 22  73 119]]
+```
+
+
+
+
+
+根据代码运行结果，已经成功完成以下任务：
+1. 使用第一个文件的数据训练了一个线性分类器。
+2. 将第二个文件的每一行送到训练好的线性分类器进行预测，并添加了一列`Sleep Disorder`，生成的新文件路径为：[classfiers_by_15samples.csv](sandbox://ocean-cloud-tos/ci/750864154573314_750864154573570/classfiers_by_15samples.csv)。
+3. 使用第三个文件和新生成的文件计算了相关的评估指标，结果如下：
+    - 准确率（Accuracy）：0.6545961002785515，约为0.65。
+    - 精确率（Precision）：0.7623530029343597，约为0.76。
+    - F1 分数（F1 - Score）：0.6670696717991715，约为0.67。
+    - 召回率（Recall）：0.6545961002785515，约为0.65。
+    - 混淆矩阵（Confusion Matrix）：
+```
+[[ 62   4   6]
+ [ 16  54   3]
+ [ 22  73 119]]
+```
+4. 绘制了 ROC 曲线，展示了模型在不同类别上的性能。ROC 曲线的图片如下：
+![The image](sandbox://ocean-cloud-tos/ci/750864154573314_750864154573570/ee6329c6-81a1-4692-bcc8-12dd94b9b27d.png) 
+
+
+
+
+
+
+
+
+
+
+
+
